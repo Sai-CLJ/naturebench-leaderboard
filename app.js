@@ -26,13 +26,13 @@
   const domainBarScaleMax = 40;
 
   const providerLogos = [
-    { match: /opus/i, provider: "Anthropic / Claude", monogram: "Cl", src: "assets/logos/anthropic.svg" },
+    { match: /opus|claude|sonnet|haiku/i, provider: "Claude", monogram: "Cl", src: "assets/logos/claude.svg" },
     { match: /gpt/i, provider: "OpenAI", monogram: "OA", src: "assets/logos/openai.svg" },
     { match: /gemini/i, provider: "Google Gemini", monogram: "G", src: "assets/logos/gemini.svg" },
     { match: /deepseek/i, provider: "DeepSeek", monogram: "DS", src: "assets/logos/deepseek.svg" },
     { match: /qwen/i, provider: "Qwen", monogram: "Q", src: "assets/logos/qwen.svg" },
-    { match: /kimi/i, provider: "Moonshot / Kimi", monogram: "K", src: "assets/logos/kimi.svg" },
-    { match: /glm/i, provider: "Z.ai / GLM", monogram: "GL", src: "assets/logos/glm.svg" },
+    { match: /kimi|moonshot/i, provider: "MoonshotAI", monogram: "K", src: "assets/logos/moonshot.svg" },
+    { match: /glm|z\\.ai/i, provider: "Z.ai", monogram: "Z", src: "assets/logos/zai.svg" },
     { match: /minimax/i, provider: "MiniMax", monogram: "MM", src: "assets/logos/minimax.svg" },
   ];
 
@@ -422,17 +422,13 @@
           ${rows.map((row, index) => {
             const crClass = row.completionRate < 90 ? "warn" : "";
             const invalidClass = row.invalid > 0 ? "warn" : "";
-            const provider = providerForModel(row.name);
             return `
               <tr>
                 <td><span class="pill ${index < 3 ? "good" : ""}">${index + 1}</span></td>
                 <td>
                   <div class="model-cell">
                     ${modelLogoMarkup(row.name)}
-                    <div class="model-cell-text">
-                      <span class="method-name">${escapeHtml(row.name)}</span>
-                      <span class="subtle provider-name">${escapeHtml(provider.provider)}</span>
-                    </div>
+                    <span class="method-name">${escapeHtml(row.name)}</span>
                   </div>
                 </td>
                 <td><span class="subtle">${escapeHtml(row.harness)}</span></td>
