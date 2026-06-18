@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="title">
+  <title id="title">Kimi provider mark</title>
+  <rect x="3" y="3" width="42" height="42" rx="9" fill="#f2f0ff" stroke="#cbc4ee" stroke-width="2"/>
+  <circle cx="24" cy="24" r="13" fill="#6a54c8"/>
+  <path d="M18 15v18M30 15 20 24l10 9" fill="none" stroke="#ffffff" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

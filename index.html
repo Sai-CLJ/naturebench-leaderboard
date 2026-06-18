@@ -38,6 +38,7 @@
       <div class="eyebrow">Scientific ML Agent Benchmark</div>
       <h1>Nature<span>Bench</span></h1>
       <p>Can coding agents match the published SOTA of Nature-family papers?</p>
+      <p class="hero-setting">We evaluate 10 coding-agent configurations on 90 Nature-family scientific ML tasks in isolated containers, with web search disabled and a 4-hour budget per task.</p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="#leaderboard">Leaderboard</a>
         <a class="btn" href="#domains">Domain Breakdown</a>
@@ -50,9 +51,90 @@
       <div class="container">
         <h2 class="section-title">Leaderboard</h2>
         <p class="section-description">Ranked by Surpass-SOTA: valid task-level <em>g</em> &gt; 0.1.</p>
+        <p class="section-description metric-primer"><code>g</code> is the SOTA-normalized relative gap. <code>g = 0</code> matches the paper-reported SOTA; <code>g &gt; 0.1</code> counts as Surpass-SOTA. Formula: <code>g = dir * (m - m_sota) / |m_sota|</code>.</p>
 
-        <!-- Summary metric cards removed from the current homepage design. Keep the JS renderer available for quick restoration. -->
-        <!-- <div class="metrics-strip" id="summary-metrics"></div> -->
+        <div class="metrics-strip leaderboard-summary" id="summary-metrics" aria-label="Benchmark summary">
+          <div class="metric summary-card">
+            <div class="metric-value">90</div>
+            <div class="metric-label">Tasks</div>
+          </div>
+          <div class="metric summary-card">
+            <div class="metric-value">10</div>
+            <div class="metric-label">Agent-model configurations</div>
+          </div>
+          <div class="metric summary-card">
+            <div class="metric-value">6</div>
+            <div class="metric-label">Scientific domains</div>
+          </div>
+          <div class="metric summary-card">
+            <div class="metric-value">17.8%</div>
+            <div class="metric-label">Best Surpass-SOTA</div>
+          </div>
+          <div class="metric summary-card">
+            <div class="metric-value">47.8%</div>
+            <div class="metric-label">Best Match-SOTA</div>
+          </div>
+          <div class="metric summary-card">
+            <div class="metric-value">100.0%</div>
+            <div class="metric-label">Top completion</div>
+          </div>
+        </div>
+
+        <div class="panel table-panel numeric-board-panel" id="numeric-main-board" aria-labelledby="numeric-leaderboard-title">
+          <div class="panel-head">
+            <div>
+              <h3 id="numeric-leaderboard-title">Main Leaderboard</h3>
+              <p>Numeric ranking of agent-model configurations by Surpass-SOTA.</p>
+            </div>
+          </div>
+          <div class="numeric-board-wrap">
+            <table class="numeric-board-table" id="numeric-leaderboard">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Model</th>
+                  <th>Harness</th>
+                  <th>Surpass-SOTA</th>
+                  <th>Match-SOTA</th>
+                  <th>Median g (all)</th>
+                  <th>CR</th>
+                  <th>SR</th>
+                  <th>Invalid</th>
+                </tr>
+              </thead>
+              <tbody id="numeric-leaderboard-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel metric-guide-panel" id="metric-guide" aria-labelledby="metric-guide-title">
+          <div class="panel-head">
+            <div>
+              <h3 id="metric-guide-title">Metric Guide</h3>
+              <p>Definitions for compact leaderboard columns.</p>
+            </div>
+          </div>
+          <div class="metric-guide-formula">
+            <code>g = dir * (m - m_sota) / |m_sota|</code>
+            <span><code>dir</code> handles whether a task metric is higher-is-better or lower-is-better.</span>
+          </div>
+          <dl class="metric-guide-list">
+            <dt class="metric-guide-term"><code>g</code></dt>
+            <dd class="metric-guide-definition">SOTA-normalized relative gap.</dd>
+            <dt class="metric-guide-term">Surpass-SOTA</dt>
+            <dd class="metric-guide-definition">Fraction of valid tasks with <code>g &gt; 0.1</code>.</dd>
+            <dt class="metric-guide-term">Match-SOTA</dt>
+            <dd class="metric-guide-definition">Fraction of valid tasks with <code>g &gt;= 0</code>.</dd>
+            <dt class="metric-guide-term">Median g (all)</dt>
+            <dd class="metric-guide-definition">Median <code>g</code> over all tasks; no valid score counts as <code>g = -1</code>.</dd>
+            <dt class="metric-guide-term">CR</dt>
+            <dd class="metric-guide-definition">Completion Rate, fraction of tasks yielding a valid score.</dd>
+            <dt class="metric-guide-term">SR</dt>
+            <dd class="metric-guide-definition">Score Rate, fraction of tasks yielding any score.</dd>
+            <dt class="metric-guide-term">Invalid</dt>
+            <dd class="metric-guide-definition">Number of judge-invalid model-task runs.</dd>
+          </dl>
+        </div>
 
         <div class="panel chart-panel">
           <div class="panel-head">
@@ -66,8 +148,8 @@
                 <option value="surpassSota">Surpass-SOTA</option>
                 <option value="matchSota">Match-SOTA</option>
                 <option value="strongSurpassSota">Strong Surpass</option>
-                <option value="medianAll">Median g all</option>
-                <option value="meanAll">Mean g all</option>
+                <option value="medianAll">Median g (all)</option>
+                <option value="meanAll">Mean g (all)</option>
                 <option value="completionRate">Completion Rate</option>
                 <option value="scoreRate">Score Rate</option>
                 <option value="invalid">Invalid Count</option>
@@ -75,7 +157,7 @@
             </div>
           </div>
           <div class="bar-chart" id="leaderboard-chart"></div>
-          <p class="chart-footnote">Surpass-SOTA: valid <em>g</em> &gt; 0.1. Strong Surpass: valid <em>g</em> &gt; 0.5.</p>
+          <p class="chart-footnote">Secondary comparison view. Surpass-SOTA: valid <em>g</em> &gt; 0.1. Strong Surpass: valid <em>g</em> &gt; 0.5.</p>
         </div>
 
         <div class="panel table-panel">
@@ -88,9 +170,9 @@
                 <th>Surpass-SOTA</th>
                 <th>Match-SOTA</th>
                 <th>Strong Surpass</th>
-                <th>g̃ all</th>
-                <th>ḡ all</th>
-                <th>g̃ valid</th>
+                <th>Median g (all)</th>
+                <th>Mean g (all)</th>
+                <th>Median g (valid)</th>
                 <th>CR</th>
                 <th>SR</th>
                 <th>Invalid</th>
@@ -171,7 +253,7 @@
                 <th>Winner</th>
                 <th>Surpass-SOTA</th>
                 <th>Match-SOTA</th>
-                <th>g̃ all</th>
+                <th>Median g (all)</th>
               </tr>
             </thead>
             <tbody id="domain-winners-body"></tbody>
@@ -184,6 +266,14 @@
       <div class="container">
         <h2 class="section-title">Case-Level View</h2>
         <p class="section-description">Each cell shows task-level normalized relative gap <em>g</em>. Values above 0.1 count as Surpass-SOTA; nonnegative values match the paper's reported SOTA.</p>
+        <div class="case-matrix-legend legend" id="case-matrix-legend" aria-label="Case matrix legend">
+          <span class="legend-item case-legend-item"><span class="legend-swatch case-legend-swatch case-legend-swatch-surpass" aria-hidden="true"></span>Surpass-SOTA, <code>g &gt; 0.1</code></span>
+          <span class="legend-item case-legend-item"><span class="legend-swatch case-legend-swatch case-legend-swatch-match" aria-hidden="true"></span>Match-SOTA, <code>0 &lt;= g &lt;= 0.1</code></span>
+          <span class="legend-item case-legend-item"><span class="legend-swatch case-legend-swatch case-legend-swatch-below" aria-hidden="true"></span>Below SOTA, <code>g &lt; 0</code></span>
+          <span class="legend-item case-legend-item"><span class="legend-swatch case-legend-swatch case-legend-swatch-invalid" aria-hidden="true"></span>Invalid</span>
+          <span class="legend-item case-legend-item"><span class="legend-swatch case-legend-swatch case-legend-swatch-none" aria-hidden="true">none</span>No score/submission</span>
+          <span class="legend-item case-legend-item"><span class="legend-swatch case-legend-swatch case-legend-swatch-best" aria-hidden="true"></span>Outlined cell: best configuration for that task</span>
+        </div>
 
         <div class="panel table-panel case-panel">
           <div class="panel-head case-head">

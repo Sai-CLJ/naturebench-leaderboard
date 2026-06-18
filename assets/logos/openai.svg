@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="title">
+  <title id="title">OpenAI provider mark</title>
+  <rect x="3" y="3" width="42" height="42" rx="9" fill="#eef7f3" stroke="#b9d7cb" stroke-width="2"/>
+  <circle cx="24" cy="24" r="12.5" fill="none" stroke="#116d61" stroke-width="4"/>
+  <path d="M24 11.5v25M11.5 24h25M15.2 15.2l17.6 17.6M32.8 15.2 15.2 32.8" stroke="#116d61" stroke-width="2.2" stroke-linecap="round"/>
+</svg>

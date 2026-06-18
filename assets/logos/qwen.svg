@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="title">
+  <title id="title">Qwen provider mark</title>
+  <rect x="3" y="3" width="42" height="42" rx="9" fill="#f1f4ff" stroke="#c3cbed" stroke-width="2"/>
+  <circle cx="23" cy="23" r="11" fill="none" stroke="#485cc7" stroke-width="5"/>
+  <path d="m30.5 30.5 5.8 5.8" stroke="#485cc7" stroke-width="5" stroke-linecap="round"/>
+</svg>

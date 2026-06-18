@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="title">
+  <title id="title">MiniMax provider mark</title>
+  <rect x="3" y="3" width="42" height="42" rx="9" fill="#fff4ea" stroke="#ecc8a7" stroke-width="2"/>
+  <path d="M13 34V15h5.2l5.8 9.2 5.8-9.2H35v19h-5.5V24.2L24 32.1l-5.5-7.9V34H13Z" fill="#b85a1c"/>
+</svg>

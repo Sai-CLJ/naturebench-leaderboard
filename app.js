@@ -10,18 +10,30 @@
     surpassSota: { label: "Surpass-SOTA", type: "percent", higher: true, minZero: true },
     matchSota: { label: "Match-SOTA", type: "percent", higher: true, minZero: true },
     strongSurpassSota: { label: "Strong Surpass", type: "percent", higher: true, minZero: true },
-    medianAll: { label: "Median g all", type: "score", higher: true },
-    meanAll: { label: "Mean g all", type: "score", higher: true },
+    medianAll: { label: "Median g (all)", type: "score", higher: true },
+    meanAll: { label: "Mean g (all)", type: "score", higher: true },
     completionRate: { label: "Completion Rate", type: "percent", higher: true, minZero: true },
     scoreRate: { label: "Score Rate", type: "percent", higher: true, minZero: true },
-    invalid: { label: "Invalid Count", type: "count", higher: false },
+    invalid: { label: "Invalid", type: "count", higher: false },
   };
 
   const binClasses = ["bin-none", "bin-low", "bin-neg", "bin-small", "bin-mid", "bin-high"];
   const detailTabs = [
     ["trajectory", "Trajectory"],
-    ["evidence", "Evidence"],
-    ["artifacts", "Artifacts"],
+    ["diagnosis", "Diagnosis"],
+  ];
+
+  const domainBarScaleMax = 40;
+
+  const providerLogos = [
+    { match: /opus/i, provider: "Anthropic / Claude", monogram: "Cl", src: "assets/logos/anthropic.svg" },
+    { match: /gpt/i, provider: "OpenAI", monogram: "OA", src: "assets/logos/openai.svg" },
+    { match: /gemini/i, provider: "Google Gemini", monogram: "G", src: "assets/logos/gemini.svg" },
+    { match: /deepseek/i, provider: "DeepSeek", monogram: "DS", src: "assets/logos/deepseek.svg" },
+    { match: /qwen/i, provider: "Qwen", monogram: "Q", src: "assets/logos/qwen.svg" },
+    { match: /kimi/i, provider: "Moonshot / Kimi", monogram: "K", src: "assets/logos/kimi.svg" },
+    { match: /glm/i, provider: "Z.ai / GLM", monogram: "GL", src: "assets/logos/glm.svg" },
+    { match: /minimax/i, provider: "MiniMax", monogram: "MM", src: "assets/logos/minimax.svg" },
   ];
 
   const featuredCases = [
@@ -42,7 +54,6 @@
       paper: "Paper route: graph-representation cancer gene prediction over multiple biological interaction networks.",
       verdict: "Judge-valid because predictions are produced by trained ChebNet GNN ensembles that load HDF5 network data, compute graph Laplacians, train with early stopping and improve through real submissions.",
       takeaway: "This is the cleanest front-page trajectory: it starts below SOTA, crosses the Surpass-SOTA threshold g>0.1 at attempt 2, then improves monotonically through attempt 6 while remaining judge-valid.",
-      artifacts: ["submissions.jsonl: 6 attempts", "judge_verdict.json: valid", "workspace/run.py: ChebNet GNN ensemble", "result.json: success, 3.87h runtime"],
       progression: [
         ["A1", "-0.017"],
         ["A2", "+0.125"],
@@ -76,7 +87,6 @@
       paper: "Paper route: large-scale Nucleotide Transformer pretraining and transfer to downstream genomic sequence tasks.",
       verdict: "Judge-valid because all predictions come from trained models using provided sequences, not format fallbacks or lookup.",
       takeaway: "The trace is useful because it separates execution competence from missing pretraining scale: many real attempts still plateau below the paper method.",
-      artifacts: ["submissions.jsonl: 258 attempts", "workspace/run.py: all 19 outputs", "cnn_classify.py / cnn_deepstarr.py: sequence models"],
       progression: [
         ["A1", "-0.414", 16],
         ["A2", "-0.327", 32],
@@ -110,7 +120,6 @@
       paper: "Paper route: LocalTransform models local reaction centers and bond changes; Top-1 exact-match accuracy is 0.908.",
       verdict: "Judge-valid because final predictions are produced by the trained ReactionTransformer and beam-search inference.",
       takeaway: "This case works as an execution-depth example: the agent builds a plausible full stack, improves sharply, then runs into time-budget and inference limits.",
-      artifacts: ["submissions.jsonl: 2 attempts", "workspace/model.py: ReactionTransformer", "workspace/infer.py: batched beam search"],
       progression: [
         ["A1", "-0.849", 16],
         ["A2", "-0.355", 74],
@@ -182,6 +191,157 @@
     return String(value);
   }
 
+  function providerForModel(modelName) {
+    const match = providerLogos.find((item) => item.match.test(modelName));
+    if (match) return match;
+    const monogram = String(modelName)
+      .split(/[\s.-]+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase() || "?";
+    return { provider: "Unknown provider", monogram, src: "" };
+  }
+
+  function modelLogoMarkup(modelName) {
+    const logo = providerForModel(modelName);
+    const fallback = `<span class="model-logo-fallback"${logo.src ? " hidden" : ""}>${escapeHtml(logo.monogram)}</span>`;
+    const image = logo.src
+      ? `<img class="model-logo-img" data-provider-logo src="${escapeHtml(logo.src)}" alt="" width="22" height="22" loading="lazy" aria-hidden="true">`
+      : "";
+    return `
+      <span class="model-logo" title="${escapeHtml(logo.provider)}" aria-label="${escapeHtml(logo.provider)}">
+        ${image}
+        ${fallback}
+      </span>
+    `;
+  }
+
+  function bindLogoFallbacks(root) {
+    root.querySelectorAll("[data-provider-logo]").forEach((image) => {
+      const showFallback = () => {
+        image.hidden = true;
+        const fallback = image.parentElement?.querySelector(".model-logo-fallback");
+        if (fallback) fallback.hidden = false;
+        image.parentElement?.classList.add("logo-fallback");
+      };
+      image.addEventListener("error", showFallback, { once: true });
+      if (image.complete && image.naturalWidth === 0) {
+        showFallback();
+      }
+    });
+  }
+
+  function insertAfter(reference, element) {
+    reference.parentNode.insertBefore(element, reference.nextSibling);
+  }
+
+  function ensureElement(id, createElement) {
+    const existing = $(id);
+    if (existing) return existing;
+    const element = createElement();
+    element.id = id;
+    return element;
+  }
+
+  function ensureLeaderboardContainers() {
+    const leaderboardSection = $("leaderboard");
+    const container = leaderboardSection?.querySelector(".container");
+    const chartPanel = $("leaderboard-chart")?.closest(".panel");
+    if (!container || !chartPanel) return;
+
+    const description = container.querySelector(".section-description");
+    const summary = ensureElement("summary-metrics", () => {
+      const element = document.createElement("div");
+      element.className = "metrics-strip numeric-summary";
+      if (description) insertAfter(description, element);
+      else container.insertBefore(element, chartPanel);
+      return element;
+    });
+    if (!summary.classList.contains("metrics-strip")) summary.classList.add("metrics-strip");
+    summary.classList.add("numeric-summary");
+
+    const board = ensureElement("numeric-main-board", () => {
+      const element = document.createElement("div");
+      element.className = "panel table-panel numeric-board-panel";
+      container.insertBefore(element, chartPanel);
+      return element;
+    });
+    board.classList.add("panel", "table-panel", "numeric-board-panel");
+    if (!board.parentNode) container.insertBefore(board, chartPanel);
+
+    const guide = ensureElement("metric-guide", () => {
+      const element = document.createElement("div");
+      element.className = "panel chart-panel metric-guide-panel";
+      container.insertBefore(element, chartPanel);
+      return element;
+    });
+    guide.classList.add("panel", "chart-panel", "metric-guide-panel");
+    if (!guide.parentNode) container.insertBefore(guide, chartPanel);
+
+    if (summary.compareDocumentPosition(board) & Node.DOCUMENT_POSITION_PRECEDING) {
+      container.insertBefore(summary, board);
+    }
+    if (board.nextElementSibling !== guide) {
+      insertAfter(board, guide);
+    }
+    if (guide.nextElementSibling !== chartPanel) {
+      insertAfter(guide, chartPanel);
+    }
+  }
+
+  function ensureCaseLegend() {
+    const caseSection = $("cases");
+    const container = caseSection?.querySelector(".container");
+    const casePanel = container?.querySelector(".case-panel");
+    if (!container || !casePanel || $("case-matrix-legend")) return;
+
+    const legend = document.createElement("div");
+    legend.id = "case-matrix-legend";
+    legend.className = "legend case-matrix-legend";
+    const description = container.querySelector(".section-description");
+    if (description) insertAfter(description, legend);
+    else container.insertBefore(legend, casePanel);
+  }
+
+  function updateStaticLabels() {
+    Object.entries(metricConfig).forEach(([value, config]) => {
+      const option = document.querySelector(`#rank-metric option[value="${value}"]`);
+      if (option) option.textContent = config.label;
+    });
+
+    const leaderboardHead = $("leaderboard-body")?.closest("table")?.querySelector("thead tr");
+    if (leaderboardHead) {
+      leaderboardHead.innerHTML = `
+        <th>Rank</th>
+        <th>Model</th>
+        <th>Harness</th>
+        <th>Surpass-SOTA</th>
+        <th>Match-SOTA</th>
+        <th>Strong Surpass</th>
+        <th>Median g (all)</th>
+        <th>Mean g (all)</th>
+        <th>Median g (valid)</th>
+        <th>CR</th>
+        <th>SR</th>
+        <th>Invalid</th>
+      `;
+    }
+
+    const domainWinnersHead = $("domain-winners-body")?.closest("table")?.querySelector("thead tr");
+    if (domainWinnersHead) {
+      domainWinnersHead.innerHTML = `
+        <th>Domain</th>
+        <th>N</th>
+        <th>Winner</th>
+        <th>Surpass-SOTA</th>
+        <th>Match-SOTA</th>
+        <th>Median g (all)</th>
+      `;
+    }
+  }
+
   function sortRows(rows, metric) {
     const config = metricConfig[metric];
     return [...rows].sort((a, b) => {
@@ -222,34 +382,126 @@
     const summary = $("summary-metrics");
     if (!summary) return;
 
-    const top = data.leaderboard[0];
+    const rows = sortRows(data.leaderboard, "surpassSota");
+    const top = rows[0];
     const topMatch = [...data.leaderboard].sort((a, b) => b.matchSota - a.matchSota || b.surpassSota - a.surpassSota)[0];
-    const topStrong = [...data.leaderboard].sort((a, b) => b.strongSurpassSota - a.strongSurpassSota || b.surpassSota - a.surpassSota)[0];
-    const invalidTotal = data.leaderboard.reduce((sum, row) => sum + row.invalid, 0);
+    const topCompletion = [...data.leaderboard].sort((a, b) => b.completionRate - a.completionRate || b.surpassSota - a.surpassSota)[0];
     const cards = [
-      ["Corpus", data.benchmark.taskCount, "final benchmark tasks"],
-      ["Configurations", data.benchmark.modelCount, "agent-model pairs"],
-      ["Top Surpass-SOTA", formatPercent(top.surpassSota), top.name],
-      ["Top Match-SOTA", formatPercent(topMatch.matchSota), topMatch.name],
-      ["Scientific Domains", data.benchmark.domainCount, "domain-classified tasks"],
-      ["Judge-Invalid", invalidTotal, "submissions filtered"],
-      ["Top Completion", "100.0%", "Opus 4.6 and Opus 4.7"],
-      ["Strong Surpass", formatPercent(topStrong.strongSurpassSota), "g > 0.5 best rate"],
+      [data.benchmark.taskCount, "Tasks", data.benchmark.name || "NatureBench"],
+      [data.benchmark.modelCount, "Agent-model configurations", "evaluated configurations"],
+      [data.benchmark.domainCount, "Scientific domains", "Nature-family task groups"],
+      [formatPercent(top.surpassSota), "Best Surpass-SOTA", top.name],
+      [formatPercent(topMatch.matchSota), "Best Match-SOTA", topMatch.name],
+      [formatPercent(topCompletion.completionRate), "Top completion", topCompletion.name],
     ];
 
-    summary.innerHTML = cards.map(([label, value, note]) => `
-      <div class="metric">
-        <div class="metric-label">${escapeHtml(label)}</div>
+    summary.innerHTML = cards.map(([value, label, note]) => `
+      <div class="metric numeric-summary-card">
         <div class="metric-value">${escapeHtml(value)}</div>
+        <div class="metric-label">${escapeHtml(label)}</div>
         <div class="metric-note">${escapeHtml(note)}</div>
       </div>
     `).join("");
+  }
+
+  function renderNumericBoard() {
+    const board = $("numeric-main-board");
+    if (!board) return;
+
+    const rows = sortRows(data.leaderboard, "surpassSota");
+    board.innerHTML = `
+      <div class="panel-head numeric-board-head">
+        <div>
+          <h3 id="numeric-leaderboard-title">Main Leaderboard</h3>
+          <p><code>g</code> is the SOTA-normalized relative gap: <code>g = dir * (m - m_sota) / |m_sota|</code>.</p>
+        </div>
+      </div>
+      <table class="numeric-board-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Model</th>
+            <th>Harness</th>
+            <th>Surpass-SOTA</th>
+            <th>Match-SOTA</th>
+            <th>Median g (all)</th>
+            <th>CR</th>
+            <th>SR</th>
+            <th>Invalid</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map((row, index) => {
+            const crClass = row.completionRate < 90 ? "warn" : "";
+            const invalidClass = row.invalid > 0 ? "warn" : "";
+            const provider = providerForModel(row.name);
+            return `
+              <tr>
+                <td><span class="pill ${index < 3 ? "good" : ""}">${index + 1}</span></td>
+                <td>
+                  <div class="model-cell">
+                    ${modelLogoMarkup(row.name)}
+                    <div class="model-cell-text">
+                      <span class="method-name">${escapeHtml(row.name)}</span>
+                      <span class="subtle provider-name">${escapeHtml(provider.provider)}</span>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="subtle">${escapeHtml(row.harness)}</span></td>
+                <td><span class="pill good numeric-primary">${formatPercent(row.surpassSota)}</span></td>
+                <td>${formatPercent(row.matchSota)}</td>
+                <td>${formatScore(row.medianAll)}</td>
+                <td><span class="pill ${crClass}">${formatPercent(row.completionRate)}</span></td>
+                <td>${formatPercent(row.scoreRate)}</td>
+                <td><span class="pill ${invalidClass}">${row.invalid}</span></td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+    `;
+    bindLogoFallbacks(board);
+  }
+
+  function renderMetricGuide() {
+    const guide = $("metric-guide");
+    if (!guide) return;
+
+    const definitions = [
+      ["g", "SOTA-normalized relative gap."],
+      ["Surpass-SOTA", "fraction of valid tasks with g > 0.1."],
+      ["Match-SOTA", "fraction of valid tasks with g >= 0."],
+      ["Median g (all)", "median g over all tasks; no valid score counts as g = -1."],
+      ["CR", "Completion Rate, fraction of tasks yielding a valid score."],
+      ["SR", "Score Rate, fraction of tasks yielding any score."],
+      ["Invalid", "number of judge-invalid model-task runs."],
+    ];
+
+    guide.innerHTML = `
+      <div class="metric-guide-head">
+        <h3 id="metric-guide-title">Metric Guide</h3>
+        <p><code>g</code> is the SOTA-normalized relative gap. <code>g = 0</code> matches the paper-reported SOTA; <code>g &gt; 0.1</code> counts as Surpass-SOTA.</p>
+      </div>
+      <div class="metric-formula-row">
+        <code>g = dir * (m - m_sota) / |m_sota|</code>
+        <span><code>dir</code> handles whether a task metric is higher-is-better or lower-is-better.</span>
+      </div>
+      <div class="metric-guide-grid">
+        ${definitions.map(([term, definition]) => `
+          <div class="metric-guide-item">
+            <strong>${escapeHtml(term)}</strong>
+            <span>${escapeHtml(definition)}</span>
+          </div>
+        `).join("")}
+      </div>
+    `;
   }
 
   function renderLeaderboard() {
     const metric = state.rankMetric;
     const config = metricConfig[metric];
     const rows = sortRows(data.leaderboard, metric);
+    renderNumericBoard();
     $("chart-subtitle").textContent = `Sorted by ${config.label}`;
 
     $("leaderboard-chart").innerHTML = rows.map((row, index) => {
@@ -321,7 +573,7 @@
         <div class="domain-count">N=${domain.n}</div>
         <div class="domain-winner">${escapeHtml(domain.winner)} · ${formatPercent(domain.winnerSurpassSota)}</div>
         <div class="mini-meter" aria-hidden="true"><span style="--w:${domain.winnerSurpassSota}%"></span></div>
-        <div class="domain-stat">Match ${formatPercent(domain.winnerMatchSota)} · g̃ ${formatScore(domain.winnerMedianAll)}</div>
+        <div class="domain-stat">Match ${formatPercent(domain.winnerMatchSota)} · Median g ${formatScore(domain.winnerMedianAll)}</div>
       </button>
     `).join("");
 
@@ -345,20 +597,60 @@
     const domain = data.domains.find((item) => item.domain === state.selectedDomain) || data.domains[0];
     if (!domain) return;
     $("domain-chart-title").textContent = domain.domain;
-    $("domain-chart-subtitle").textContent = `N=${domain.n} tasks`;
+    $("domain-chart-subtitle").textContent = `N=${domain.n} tasks · Fixed 0-${domainBarScaleMax}% scale`;
 
-    const max = Math.max(...domain.models.map((row) => row.surpassSota));
-    $("domain-chart").innerHTML = domain.models.map((row, index) => `
-      <div class="bar-row">
-        <div class="bar-name" title="${escapeHtml(row.name)}">
-          <span class="rank-dot">${index + 1}</span>${escapeHtml(row.name)}
-        </div>
-        <div class="bar-track" aria-hidden="true">
-          <div class="bar-fill" style="--w:${max === 0 ? 3 : clamp(row.surpassSota / max * 100, 3, 100)}%"></div>
-        </div>
-        <div class="bar-value">${formatPercent(row.surpassSota)}</div>
+    $("domain-chart").innerHTML = `
+      <div class="domain-scale-note">Fixed 0-${domainBarScaleMax}% scale</div>
+      <div class="domain-scale-axis" aria-hidden="true">
+        ${[0, 10, 20, 30, 40].map((tick) => `<span>${tick}</span>`).join("")}
       </div>
-    `).join("");
+      ${domain.models.map((row, index) => {
+        const width = row.surpassSota <= 0 ? 0 : clamp(row.surpassSota / domainBarScaleMax * 100, 3, 100);
+        return `
+          <div class="bar-row">
+            <div class="bar-name" title="${escapeHtml(row.name)}">
+              <span class="rank-dot">${index + 1}</span>${escapeHtml(row.name)}
+            </div>
+            <div class="bar-track" aria-hidden="true">
+              <div class="bar-fill" style="--w:${width}%"></div>
+            </div>
+            <div class="bar-value">${formatPercent(row.surpassSota)}</div>
+          </div>
+        `;
+      }).join("")}
+    `;
+  }
+
+  function renderCaseLegend() {
+    const legend = $("case-matrix-legend");
+    if (!legend) return;
+
+    legend.innerHTML = `
+      <span class="legend-item">
+        <span class="legend-swatch" style="background: rgba(20, 124, 114, 0.48);"></span>
+        dark green: Surpass-SOTA, <code>g &gt; 0.1</code>
+      </span>
+      <span class="legend-item">
+        <span class="legend-swatch" style="background: rgba(111, 183, 170, 0.16);"></span>
+        light green: Match-SOTA, <code>0 &lt;= g &lt;= 0.1</code>
+      </span>
+      <span class="legend-item">
+        <span class="legend-swatch" style="background: rgba(127, 139, 134, 0.14);"></span>
+        gray/white: below SOTA, <code>g &lt; 0</code>
+      </span>
+      <span class="legend-item">
+        <span class="legend-swatch" style="background: var(--warn-soft); border-color: var(--warn);"></span>
+        red: invalid
+      </span>
+      <span class="legend-item">
+        <span class="legend-swatch" style="display: inline-flex; align-items: center; justify-content: center; width: auto; min-width: 2.8rem; padding: 0 0.25rem;">none</span>
+        no score/submission
+      </span>
+      <span class="legend-item">
+        <span class="legend-swatch" style="background: var(--panel); outline: 2px solid color-mix(in srgb, var(--accent-primary) 45%, transparent); outline-offset: -2px;"></span>
+        outlined cell: best configuration for that task
+      </span>
+    `;
   }
 
   function renderDomainWinners() {
@@ -610,6 +902,10 @@
   }
 
   function renderFeaturedDetailTabs() {
+    if (!detailTabs.some(([key]) => key === state.featuredDetail)) {
+      state.featuredDetail = "trajectory";
+    }
+
     $("featured-detail-tabs").innerHTML = detailTabs.map(([key, label]) => `
       <button class="featured-detail-tab ${key === state.featuredDetail ? "active" : ""}" data-featured-detail="${escapeHtml(key)}">
         ${escapeHtml(label)}
@@ -652,9 +948,9 @@
 
   function renderFeaturedDetail() {
     const item = selectedFeaturedCase();
-    if (state.featuredDetail === "evidence") {
+    if (state.featuredDetail === "diagnosis") {
       $("featured-detail-body").innerHTML = `
-        <div class="evidence-grid">
+        <div class="evidence-grid diagnosis-grid">
           <div class="evidence-box">
             <h4>Paper route</h4>
             <p>${escapeHtml(item.paper)}</p>
@@ -663,20 +959,10 @@
             <h4>Agent route</h4>
             <p>${escapeHtml(item.route)}</p>
           </div>
-        </div>
-      `;
-      return;
-    }
-
-    if (state.featuredDetail === "artifacts") {
-      $("featured-detail-body").innerHTML = `
-        <div class="artifact-grid">
-          ${item.artifacts.map((artifact) => `
-            <div class="artifact-chip">
-              <span></span>
-              <strong>${escapeHtml(artifact)}</strong>
-            </div>
-          `).join("")}
+          <div class="evidence-box diagnosis-verdict">
+            <h4>Judge diagnosis</h4>
+            <p>${escapeHtml(item.verdict)}</p>
+          </div>
         </div>
       `;
       return;
@@ -787,7 +1073,11 @@
 
   function init() {
     initTheme();
+    ensureLeaderboardContainers();
+    ensureCaseLegend();
+    updateStaticLabels();
     renderSummary();
+    renderMetricGuide();
     renderLeaderboard();
     renderFeaturedCases();
     renderDistribution();
@@ -796,6 +1086,7 @@
     renderDomainDetail();
     renderDomainWinners();
     renderCaseFilters();
+    renderCaseLegend();
     renderCaseTable();
     bindEvents();
   }
