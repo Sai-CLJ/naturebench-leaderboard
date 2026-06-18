@@ -271,23 +271,11 @@
     board.classList.add("panel", "table-panel", "numeric-board-panel");
     if (!board.parentNode) container.insertBefore(board, chartPanel);
 
-    const guide = ensureElement("metric-guide", () => {
-      const element = document.createElement("div");
-      element.className = "panel chart-panel metric-guide-panel";
-      container.insertBefore(element, chartPanel);
-      return element;
-    });
-    guide.classList.add("panel", "chart-panel", "metric-guide-panel");
-    if (!guide.parentNode) container.insertBefore(guide, chartPanel);
-
     if (summary.compareDocumentPosition(board) & Node.DOCUMENT_POSITION_PRECEDING) {
       container.insertBefore(summary, board);
     }
-    if (board.nextElementSibling !== guide) {
-      insertAfter(board, guide);
-    }
-    if (guide.nextElementSibling !== chartPanel) {
-      insertAfter(guide, chartPanel);
+    if (board.nextElementSibling !== chartPanel) {
+      insertAfter(board, chartPanel);
     }
   }
 
@@ -413,7 +401,7 @@
       <div class="panel-head numeric-board-head">
         <div>
           <h3 id="numeric-leaderboard-title">Main Leaderboard</h3>
-          <p><code>g</code> is the SOTA-normalized relative gap: <code>g = dir * (m - m_sota) / |m_sota|</code>.</p>
+          <p>Ranked by Surpass-SOTA. CR/SR denote valid-score and any-score rates.</p>
         </div>
       </div>
       <table class="numeric-board-table">
@@ -463,40 +451,6 @@
     bindLogoFallbacks(board);
   }
 
-  function renderMetricGuide() {
-    const guide = $("metric-guide");
-    if (!guide) return;
-
-    const definitions = [
-      ["g", "SOTA-normalized relative gap."],
-      ["Surpass-SOTA", "fraction of valid tasks with g > 0.1."],
-      ["Match-SOTA", "fraction of valid tasks with g >= 0."],
-      ["Median g (all)", "median g over all tasks; no valid score counts as g = -1."],
-      ["CR", "Completion Rate, fraction of tasks yielding a valid score."],
-      ["SR", "Score Rate, fraction of tasks yielding any score."],
-      ["Invalid", "number of judge-invalid model-task runs."],
-    ];
-
-    guide.innerHTML = `
-      <div class="metric-guide-head">
-        <h3 id="metric-guide-title">Metric Guide</h3>
-        <p><code>g</code> is the SOTA-normalized relative gap. <code>g = 0</code> matches the paper-reported SOTA; <code>g &gt; 0.1</code> counts as Surpass-SOTA.</p>
-      </div>
-      <div class="metric-formula-row">
-        <code>g = dir * (m - m_sota) / |m_sota|</code>
-        <span><code>dir</code> handles whether a task metric is higher-is-better or lower-is-better.</span>
-      </div>
-      <div class="metric-guide-grid">
-        ${definitions.map(([term, definition]) => `
-          <div class="metric-guide-item">
-            <strong>${escapeHtml(term)}</strong>
-            <span>${escapeHtml(definition)}</span>
-          </div>
-        `).join("")}
-      </div>
-    `;
-  }
-
   function renderLeaderboard() {
     const metric = state.rankMetric;
     const config = metricConfig[metric];
@@ -519,26 +473,29 @@
       `;
     }).join("");
 
-    $("leaderboard-body").innerHTML = rows.map((row, index) => {
-      const crClass = row.completionRate < 90 ? "warn" : "";
-      const invalidClass = row.invalid > 0 ? "warn" : "";
-      return `
-        <tr>
-          <td><span class="pill ${index < 3 ? "good" : ""}">${index + 1}</span></td>
-          <td><span class="method-name">${escapeHtml(row.name)}</span></td>
-          <td><span class="subtle">${escapeHtml(row.harness)}</span></td>
-          <td><span class="pill good">${formatPercent(row.surpassSota)}</span></td>
-          <td>${formatPercent(row.matchSota)}</td>
-          <td>${formatPercent(row.strongSurpassSota)}</td>
-          <td>${formatScore(row.medianAll)}</td>
-          <td>${formatScore(row.meanAll)}</td>
-          <td>${formatScore(row.medianValid)}</td>
-          <td><span class="pill ${crClass}">${formatPercent(row.completionRate)}</span></td>
-          <td>${formatPercent(row.scoreRate)}</td>
-          <td><span class="pill ${invalidClass}">${row.invalid}</span></td>
-        </tr>
-      `;
-    }).join("");
+    const detailBody = $("leaderboard-body");
+    if (detailBody) {
+      detailBody.innerHTML = rows.map((row, index) => {
+        const crClass = row.completionRate < 90 ? "warn" : "";
+        const invalidClass = row.invalid > 0 ? "warn" : "";
+        return `
+          <tr>
+            <td><span class="pill ${index < 3 ? "good" : ""}">${index + 1}</span></td>
+            <td><span class="method-name">${escapeHtml(row.name)}</span></td>
+            <td><span class="subtle">${escapeHtml(row.harness)}</span></td>
+            <td><span class="pill good">${formatPercent(row.surpassSota)}</span></td>
+            <td>${formatPercent(row.matchSota)}</td>
+            <td>${formatPercent(row.strongSurpassSota)}</td>
+            <td>${formatScore(row.medianAll)}</td>
+            <td>${formatScore(row.meanAll)}</td>
+            <td>${formatScore(row.medianValid)}</td>
+            <td><span class="pill ${crClass}">${formatPercent(row.completionRate)}</span></td>
+            <td>${formatPercent(row.scoreRate)}</td>
+            <td><span class="pill ${invalidClass}">${row.invalid}</span></td>
+          </tr>
+        `;
+      }).join("");
+    }
   }
 
   function renderDistribution() {
@@ -1077,7 +1034,6 @@
     ensureCaseLegend();
     updateStaticLabels();
     renderSummary();
-    renderMetricGuide();
     renderLeaderboard();
     renderFeaturedCases();
     renderDistribution();

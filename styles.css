@@ -293,6 +293,21 @@ section {
   font-size: 0.86rem;
 }
 
+.metric-primer {
+  max-width: 980px;
+  margin-bottom: 1.15rem;
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 24%, var(--border-color));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent-primary) 5%, var(--panel));
+  padding: 0.7rem 0.9rem;
+  color: var(--text-primary);
+  font-size: 0.78rem;
+}
+
+.metric-primer strong {
+  color: var(--accent-primary);
+}
+
 .metrics-strip,
 .summary-cards,
 .leaderboard-summary {
@@ -700,6 +715,10 @@ img.provider-logo[src=""] {
   font-weight: 800;
   line-height: 1;
   text-transform: uppercase;
+}
+
+.model-logo-fallback[hidden] {
+  display: none;
 }
 
 .harness-cell,
@@ -1468,11 +1487,11 @@ td.board-value {
 }
 
 .domain-axis,
+.domain-scale-axis,
 .fixed-scale-axis,
 .bar-axis {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0;
+  display: flex;
+  justify-content: space-between;
   margin: 0.3rem 70px 0 170px;
   color: var(--text-secondary);
   font-size: 0.58rem;
@@ -1481,6 +1500,7 @@ td.board-value {
 }
 
 .domain-axis span,
+.domain-scale-axis span,
 .fixed-scale-axis span,
 .bar-axis span {
   position: relative;
@@ -1488,12 +1508,14 @@ td.board-value {
 }
 
 .domain-axis span:first-child,
+.domain-scale-axis span:first-child,
 .fixed-scale-axis span:first-child,
 .bar-axis span:first-child {
   text-align: left;
 }
 
 .domain-axis span::before,
+.domain-scale-axis span::before,
 .fixed-scale-axis span::before,
 .bar-axis span::before {
   content: "";
@@ -1506,6 +1528,7 @@ td.board-value {
 }
 
 .domain-axis span:first-child::before,
+.domain-scale-axis span:first-child::before,
 .fixed-scale-axis span:first-child::before,
 .bar-axis span:first-child::before {
   right: auto;

@@ -50,8 +50,7 @@
     <section id="leaderboard" class="band">
       <div class="container">
         <h2 class="section-title">Leaderboard</h2>
-        <p class="section-description">Ranked by Surpass-SOTA: valid task-level <em>g</em> &gt; 0.1.</p>
-        <p class="section-description metric-primer"><code>g</code> is the SOTA-normalized relative gap. <code>g = 0</code> matches the paper-reported SOTA; <code>g &gt; 0.1</code> counts as Surpass-SOTA. Formula: <code>g = dir * (m - m_sota) / |m_sota|</code>.</p>
+        <p class="section-description metric-primer"><strong>Metric:</strong> Surpass-SOTA is the share of valid tasks with normalized gap <code>g &gt; 0.1</code>; <code>g = 0</code> matches paper SOTA. <code>CR</code>/<code>SR</code> are valid-score and any-score rates.</p>
 
         <div class="metrics-strip leaderboard-summary" id="summary-metrics" aria-label="Benchmark summary">
           <div class="metric summary-card">
@@ -107,35 +106,6 @@
           </div>
         </div>
 
-        <div class="panel metric-guide-panel" id="metric-guide" aria-labelledby="metric-guide-title">
-          <div class="panel-head">
-            <div>
-              <h3 id="metric-guide-title">Metric Guide</h3>
-              <p>Definitions for compact leaderboard columns.</p>
-            </div>
-          </div>
-          <div class="metric-guide-formula">
-            <code>g = dir * (m - m_sota) / |m_sota|</code>
-            <span><code>dir</code> handles whether a task metric is higher-is-better or lower-is-better.</span>
-          </div>
-          <dl class="metric-guide-list">
-            <dt class="metric-guide-term"><code>g</code></dt>
-            <dd class="metric-guide-definition">SOTA-normalized relative gap.</dd>
-            <dt class="metric-guide-term">Surpass-SOTA</dt>
-            <dd class="metric-guide-definition">Fraction of valid tasks with <code>g &gt; 0.1</code>.</dd>
-            <dt class="metric-guide-term">Match-SOTA</dt>
-            <dd class="metric-guide-definition">Fraction of valid tasks with <code>g &gt;= 0</code>.</dd>
-            <dt class="metric-guide-term">Median g (all)</dt>
-            <dd class="metric-guide-definition">Median <code>g</code> over all tasks; no valid score counts as <code>g = -1</code>.</dd>
-            <dt class="metric-guide-term">CR</dt>
-            <dd class="metric-guide-definition">Completion Rate, fraction of tasks yielding a valid score.</dd>
-            <dt class="metric-guide-term">SR</dt>
-            <dd class="metric-guide-definition">Score Rate, fraction of tasks yielding any score.</dd>
-            <dt class="metric-guide-term">Invalid</dt>
-            <dd class="metric-guide-definition">Number of judge-invalid model-task runs.</dd>
-          </dl>
-        </div>
-
         <div class="panel chart-panel">
           <div class="panel-head">
             <div>
@@ -158,28 +128,6 @@
           </div>
           <div class="bar-chart" id="leaderboard-chart"></div>
           <p class="chart-footnote">Secondary comparison view. Surpass-SOTA: valid <em>g</em> &gt; 0.1. Strong Surpass: valid <em>g</em> &gt; 0.5.</p>
-        </div>
-
-        <div class="panel table-panel">
-          <table>
-            <thead>
-              <tr>
-                <th>Rank</th>
-                <th>Configuration</th>
-                <th>Scaffold</th>
-                <th>Surpass-SOTA</th>
-                <th>Match-SOTA</th>
-                <th>Strong Surpass</th>
-                <th>Median g (all)</th>
-                <th>Mean g (all)</th>
-                <th>Median g (valid)</th>
-                <th>CR</th>
-                <th>SR</th>
-                <th>Invalid</th>
-              </tr>
-            </thead>
-            <tbody id="leaderboard-body"></tbody>
-          </table>
         </div>
 
         <div class="panel featured-case-panel" id="featured-cases">
