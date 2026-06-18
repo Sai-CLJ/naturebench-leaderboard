@@ -1120,6 +1120,7 @@ tbody tr:hover {
 }
 
 .domain-detail-grid {
+  grid-template-columns: 1fr;
   align-items: stretch;
 }
 
@@ -1129,37 +1130,6 @@ tbody tr:hover {
 
 .inline-head {
   margin-bottom: 0.75rem;
-}
-
-.taxonomy-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  margin-bottom: 0.8rem;
-}
-
-.taxonomy-tab {
-  border: 1px solid var(--border-color);
-  border-radius: 999px;
-  background: var(--bg-secondary);
-  color: var(--text-secondary);
-  cursor: pointer;
-  padding: 0.25rem 0.6rem;
-  font-size: 0.66rem;
-  font-weight: 800;
-}
-
-.taxonomy-tab.active {
-  color: var(--accent-primary);
-  background: var(--accent-soft);
-  border-color: color-mix(in srgb, var(--accent-primary) 30%, transparent);
-}
-
-.taxonomy-table td:nth-child(2),
-.taxonomy-table th:nth-child(2),
-.taxonomy-table td:nth-child(3),
-.taxonomy-table th:nth-child(3) {
-  text-align: right;
 }
 
 .case-panel {
@@ -1617,10 +1587,6 @@ tbody tr:hover {
 
   .table-panel > table {
     min-width: 940px;
-  }
-
-  .taxonomy-table {
-    min-width: 620px;
   }
 
   .case-table-wrap {

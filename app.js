@@ -17,14 +17,6 @@
     invalid: { label: "Invalid Count", type: "count", higher: false },
   };
 
-  const taxonomyLabels = {
-    domains: "Domains",
-    taskTypes: "Task Types",
-    coverage: "Coverage",
-    taskDirs: "Task Dirs",
-    interdisciplinary: "Task Scope",
-  };
-
   const binClasses = ["bin-none", "bin-low", "bin-neg", "bin-small", "bin-mid", "bin-high"];
   const detailTabs = [
     ["trajectory", "Trajectory"],
@@ -140,7 +132,6 @@
   const state = {
     rankMetric: "surpassSota",
     selectedDomain: data.domains[0]?.domain || "",
-    taxonomy: "domains",
     caseDomain: "all",
     caseTask: "all",
     caseSearch: "",
@@ -379,33 +370,6 @@
         <td><span class="pill good">${formatPercent(domain.winnerSurpassSota)}</span></td>
         <td>${formatPercent(domain.winnerMatchSota)}</td>
         <td>${formatScore(domain.winnerMedianAll)}</td>
-      </tr>
-    `).join("");
-  }
-
-  function renderTaxonomyTabs() {
-    $("taxonomy-tabs").innerHTML = Object.entries(taxonomyLabels).map(([key, label]) => `
-      <button class="taxonomy-tab ${key === state.taxonomy ? "active" : ""}" data-taxonomy="${key}">
-        ${escapeHtml(label)}
-      </button>
-    `).join("");
-
-    document.querySelectorAll(".taxonomy-tab").forEach((button) => {
-      button.addEventListener("click", () => {
-        state.taxonomy = button.dataset.taxonomy;
-        renderTaxonomyTabs();
-        renderTaxonomy();
-      });
-    });
-  }
-
-  function renderTaxonomy() {
-    const rows = data.taxonomy[state.taxonomy] || [];
-    $("taxonomy-body").innerHTML = rows.map((row) => `
-      <tr>
-        <td>${escapeHtml(row.label)}</td>
-        <td>${row.count}</td>
-        <td>${formatPercent(row.count / data.benchmark.taskCount * 100)}</td>
       </tr>
     `).join("");
   }
@@ -831,8 +795,6 @@
     renderDomainSelect();
     renderDomainDetail();
     renderDomainWinners();
-    renderTaxonomyTabs();
-    renderTaxonomy();
     renderCaseFilters();
     renderCaseTable();
     bindEvents();
