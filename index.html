@@ -50,7 +50,13 @@
     <section id="leaderboard" class="band">
       <div class="container">
         <h2 class="section-title">Leaderboard</h2>
-        <p class="section-description metric-primer"><strong>Metric:</strong> Surpass-SOTA is the share of valid tasks with normalized gap <code>g &gt; 0.1</code>; <code>g = 0</code> matches paper SOTA. <code>CR</code>/<code>SR</code> are valid-score and any-score rates.</p>
+        <p class="section-description metric-primer">
+          <span><strong>g:</strong> SOTA-normalized relative gap, <code>g = dir * (m - m_sota) / |m_sota|</code>; <code>dir</code> handles metric direction.</span>
+          <span><strong>Surpass-SOTA:</strong> share of judge-valid tasks with <code>g &gt; 0.1</code>.</span>
+          <span><strong>Match-SOTA:</strong> share of judge-valid tasks with <code>g &gt;= 0</code>; <code>g = 0</code> matches paper SOTA.</span>
+          <span><strong>CR:</strong> Completion Rate, the valid-score rate.</span>
+          <span><strong>SR:</strong> Score Rate, the any-score rate.</span>
+        </p>
 
         <div class="metrics-strip leaderboard-summary" id="summary-metrics" aria-label="Benchmark summary">
           <div class="metric summary-card">
@@ -106,6 +112,7 @@
           </div>
         </div>
 
+        <!-- RESTORE_CONFIGURATION_RANKING: uncomment this secondary bar leaderboard if needed.
         <div class="panel chart-panel">
           <div class="panel-head">
             <div>
@@ -129,11 +136,12 @@
           <div class="bar-chart" id="leaderboard-chart"></div>
           <p class="chart-footnote">Secondary comparison view. Surpass-SOTA: valid <em>g</em> &gt; 0.1. Strong Surpass: valid <em>g</em> &gt; 0.5.</p>
         </div>
+        -->
 
         <div class="panel featured-case-panel" id="featured-cases">
           <div class="panel-head featured-case-head">
             <div>
-              <h3>Featured Trajectory Cases</h3>
+              <h3>Case Studies</h3>
               <p>Representative cases distilled from full agent traces</p>
             </div>
             <div class="featured-count">3 cases</div>
@@ -142,7 +150,6 @@
           <div class="featured-case-layout">
             <section class="featured-case-summary" id="featured-case-summary" aria-live="polite"></section>
             <section class="featured-case-detail">
-              <div class="featured-detail-tabs" id="featured-detail-tabs" aria-label="Case detail switcher"></div>
               <div class="featured-detail-body" id="featured-detail-body" aria-live="polite"></div>
             </section>
           </div>
@@ -238,10 +245,6 @@
                 <span>Domain</span>
                 <select id="case-domain-filter"></select>
               </label>
-              <label>
-                <span>Task Type</span>
-                <select id="case-task-filter"></select>
-              </label>
             </div>
           </div>
           <div class="case-lookup-card" id="case-lookup-card" hidden></div>
@@ -283,6 +286,7 @@
     </section>
     -->
 
+    <!-- RESTORE_TEAM_CITATION: uncomment when Team and Citation content is ready.
     <section class="band">
       <div class="container">
         <div class="two-col pending-grid">
@@ -306,13 +310,12 @@
         </div>
       </div>
     </section>
+    -->
   </main>
 
   <footer class="footer">
     <div class="container">
       <span>NatureBench leaderboard</span>
-      <span class="footer-dot"></span>
-      <span>Static public preview</span>
     </div>
   </footer>
 

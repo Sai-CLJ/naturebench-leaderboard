@@ -302,10 +302,18 @@ section {
   padding: 0.7rem 0.9rem;
   color: var(--text-primary);
   font-size: 0.78rem;
+  line-height: 1.65;
+  text-align: left;
 }
 
 .metric-primer strong {
   color: var(--accent-primary);
+}
+
+.metric-primer span {
+  display: block;
+  width: min(100%, 860px);
+  margin: 0 auto;
 }
 
 .metrics-strip,
@@ -474,6 +482,10 @@ section {
   flex: 0 0 auto;
 }
 
+.model-color-row .rank-dot {
+  background: var(--accent-primary);
+}
+
 .bar-track {
   height: 24px;
   background: var(--bg-secondary);
@@ -485,7 +497,7 @@ section {
 .bar-fill {
   width: var(--w);
   height: 100%;
-  background: var(--accent-primary);
+  background: var(--model-color, var(--accent-primary));
 }
 
 .bar-value {
@@ -1093,6 +1105,31 @@ td.board-value {
   line-height: 1.35;
 }
 
+.featured-trace-link {
+  min-height: 42px;
+  margin-top: 0.9rem;
+  border: 1px solid var(--accent-primary);
+  border-radius: 6px;
+  background: var(--accent-primary);
+  color: #f8fffb;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  box-shadow: 0 10px 22px rgba(20, 124, 114, 0.14);
+}
+
+.featured-trace-link:hover {
+  background: var(--accent-secondary);
+}
+
+.featured-trace-link::after {
+  content: "->";
+  font-size: 0.78rem;
+}
+
 .featured-note {
   margin-top: auto;
   padding-top: 0.85rem;
@@ -1108,8 +1145,7 @@ td.board-value {
 .featured-case-detail {
   min-width: 0;
   padding: 0;
-  display: grid;
-  grid-template-rows: auto 1fr;
+  display: block;
   background: var(--panel);
 }
 
@@ -1389,7 +1425,7 @@ td.board-value {
 }
 
 .domain-card {
-  min-height: 140px;
+  min-height: 174px;
   padding: 0.9rem;
   border: 1px solid var(--border-color);
   border-radius: 8px;
@@ -1416,13 +1452,50 @@ td.board-value {
 .domain-count {
   color: var(--text-secondary);
   font-size: 0.66rem;
-  margin: 0.35rem 0 0.65rem;
+  margin: 0.3rem 0 0.55rem;
+}
+
+.domain-winner-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+  color: var(--model-color, var(--accent-primary));
+  font-size: 0.55rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.winner-badge {
+  min-width: 1.52rem;
+  height: 1.18rem;
+  padding: 0 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--model-color, var(--accent-primary)) 45%, var(--border-color));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--model-color, var(--accent-primary)) 12%, var(--panel));
+  color: var(--model-color, var(--accent-primary));
+  font-size: 0.52rem;
+  font-weight: 800;
 }
 
 .domain-winner {
-  color: var(--accent-primary);
+  margin-top: 0.3rem;
+  color: var(--model-color, var(--accent-primary));
   font-size: 0.74rem;
   font-weight: 800;
+  line-height: 1.25;
+}
+
+.domain-primary {
+  margin-top: 0.22rem;
+  color: var(--text-primary);
+  font-size: 0.64rem;
+  font-weight: 800;
+  line-height: 1.28;
 }
 
 .mini-meter {
@@ -1438,13 +1511,18 @@ td.board-value {
   display: block;
   height: 100%;
   width: var(--w);
-  background: var(--accent-primary);
+  background: var(--model-color, var(--accent-primary));
 }
 
 .domain-stat {
   margin-top: 0.45rem;
   color: var(--text-secondary);
   font-size: 0.66rem;
+  line-height: 1.42;
+}
+
+.domain-stat span {
+  display: block;
 }
 
 .two-col {
@@ -1456,10 +1534,12 @@ td.board-value {
 .domain-detail-grid {
   grid-template-columns: 1fr;
   align-items: stretch;
+  margin-bottom: 2.4rem;
 }
 
 .domain-detail-grid > .panel {
   height: 100%;
+  margin-top: 0;
 }
 
 .domain-scale-note,

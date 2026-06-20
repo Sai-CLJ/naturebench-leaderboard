@@ -18,11 +18,6 @@
   };
 
   const binClasses = ["bin-none", "bin-low", "bin-neg", "bin-small", "bin-mid", "bin-high"];
-  const detailTabs = [
-    ["trajectory", "Trajectory"],
-    ["diagnosis", "Diagnosis"],
-  ];
-
   const domainBarScaleMax = 40;
 
   const providerLogos = [
@@ -34,6 +29,17 @@
     { match: /kimi|moonshot/i, provider: "MoonshotAI", monogram: "K", src: "assets/logos/moonshot.svg" },
     { match: /glm|z\\.ai/i, provider: "Z.ai", monogram: "Z", src: "assets/logos/zai.svg" },
     { match: /minimax/i, provider: "MiniMax", monogram: "MM", src: "assets/logos/minimax.svg" },
+  ];
+
+  const modelColors = [
+    { match: /opus|claude|sonnet|haiku/i, color: "#a87968" },
+    { match: /gpt|openai/i, color: "#21312d" },
+    { match: /gemini/i, color: "#4e92ab" },
+    { match: /qwen/i, color: "#a9854c" },
+    { match: /kimi|moonshot/i, color: "#7e789f" },
+    { match: /glm|z\.ai/i, color: "#2f9462" },
+    { match: /deepseek/i, color: "#5f7faa" },
+    { match: /minimax/i, color: "#aa6078" },
   ];
 
   const featuredCases = [
@@ -142,11 +148,9 @@
     rankMetric: "surpassSota",
     selectedDomain: data.domains[0]?.domain || "",
     caseDomain: "all",
-    caseTask: "all",
     caseSearch: "",
     selectedCaseId: "",
     featuredCase: "cancer-gene",
-    featuredDetail: "trajectory",
   };
 
   const modelOrder = data.leaderboard.map((item) => item.name);
@@ -202,6 +206,10 @@
       .join("")
       .toUpperCase() || "?";
     return { provider: "Unknown provider", monogram, src: "" };
+  }
+
+  function modelColor(modelName) {
+    return modelColors.find((item) => item.match.test(modelName))?.color || "#147c72";
   }
 
   function modelLogoMarkup(modelName) {
@@ -401,7 +409,7 @@
       <div class="panel-head numeric-board-head">
         <div>
           <h3 id="numeric-leaderboard-title">Main Leaderboard</h3>
-          <p>Ranked by Surpass-SOTA. CR/SR denote valid-score and any-score rates.</p>
+          <p>Ranked by Surpass-SOTA. CR = Completion Rate, valid-score rate; SR = Score Rate, any-score rate.</p>
         </div>
       </div>
       <table class="numeric-board-table">
@@ -452,22 +460,26 @@
     const config = metricConfig[metric];
     const rows = sortRows(data.leaderboard, metric);
     renderNumericBoard();
-    $("chart-subtitle").textContent = `Sorted by ${config.label}`;
+    if ($("chart-subtitle")) {
+      $("chart-subtitle").textContent = `Sorted by ${config.label}`;
+    }
 
-    $("leaderboard-chart").innerHTML = rows.map((row, index) => {
-      const width = barWidth(rows, metric, row[metric]);
-      return `
-        <div class="bar-row">
-          <div class="bar-name" title="${escapeHtml(row.name)}">
-            <span class="rank-dot">${index + 1}</span>${escapeHtml(row.name)}
+    if ($("leaderboard-chart")) {
+      $("leaderboard-chart").innerHTML = rows.map((row, index) => {
+        const width = barWidth(rows, metric, row[metric]);
+        return `
+          <div class="bar-row model-color-row" style="--model-color:${modelColor(row.name)}">
+            <div class="bar-name" title="${escapeHtml(row.name)}">
+              <span class="rank-dot">${index + 1}</span>${escapeHtml(row.name)}
+            </div>
+            <div class="bar-track" aria-hidden="true">
+              <div class="bar-fill" style="--w:${width}%"></div>
+            </div>
+            <div class="bar-value">${escapeHtml(formatMetric(row[metric], config.type))}</div>
           </div>
-          <div class="bar-track" aria-hidden="true">
-            <div class="bar-fill" style="--w:${width}%"></div>
-          </div>
-          <div class="bar-value">${escapeHtml(formatMetric(row[metric], config.type))}</div>
-        </div>
-      `;
-    }).join("");
+        `;
+      }).join("");
+    }
 
     const detailBody = $("leaderboard-body");
     if (detailBody) {
@@ -521,12 +533,17 @@
 
   function renderDomainGrid() {
     $("domain-grid").innerHTML = data.domains.map((domain) => `
-      <button class="domain-card" data-domain="${escapeHtml(domain.domain)}">
+      <button class="domain-card" data-domain="${escapeHtml(domain.domain)}" style="--model-color:${modelColor(domain.winner)}">
         <div class="domain-name">${escapeHtml(domain.domain)}</div>
         <div class="domain-count">N=${domain.n}</div>
-        <div class="domain-winner">${escapeHtml(domain.winner)} · ${formatPercent(domain.winnerSurpassSota)}</div>
+        <div class="domain-winner-label"><span class="winner-badge">#1</span> Domain winner</div>
+        <div class="domain-winner">${escapeHtml(domain.winner)}</div>
+        <div class="domain-primary">Surpass-SOTA ${formatPercent(domain.winnerSurpassSota)}</div>
         <div class="mini-meter" aria-hidden="true"><span style="--w:${domain.winnerSurpassSota}%"></span></div>
-        <div class="domain-stat">Match ${formatPercent(domain.winnerMatchSota)} · Median g ${formatScore(domain.winnerMedianAll)}</div>
+        <div class="domain-stat">
+          <span>Match-SOTA ${formatPercent(domain.winnerMatchSota)}</span>
+          <span>Median g ${formatScore(domain.winnerMedianAll)}</span>
+        </div>
       </button>
     `).join("");
 
@@ -550,17 +567,17 @@
     const domain = data.domains.find((item) => item.domain === state.selectedDomain) || data.domains[0];
     if (!domain) return;
     $("domain-chart-title").textContent = domain.domain;
-    $("domain-chart-subtitle").textContent = `N=${domain.n} tasks · Fixed 0-${domainBarScaleMax}% scale`;
+    $("domain-chart-subtitle").textContent = `N=${domain.n} tasks · Surpass-SOTA rate · Fixed 0-${domainBarScaleMax}% scale`;
 
     $("domain-chart").innerHTML = `
-      <div class="domain-scale-note">Fixed 0-${domainBarScaleMax}% scale</div>
+      <div class="domain-scale-note">Surpass-SOTA rate, fixed 0-${domainBarScaleMax}% scale</div>
       <div class="domain-scale-axis" aria-hidden="true">
         ${[0, 10, 20, 30, 40].map((tick) => `<span>${tick}</span>`).join("")}
       </div>
       ${domain.models.map((row, index) => {
         const width = row.surpassSota <= 0 ? 0 : clamp(row.surpassSota / domainBarScaleMax * 100, 3, 100);
         return `
-          <div class="bar-row">
+          <div class="bar-row model-color-row" style="--model-color:${modelColor(row.name)}">
             <div class="bar-name" title="${escapeHtml(row.name)}">
               <span class="rank-dot">${index + 1}</span>${escapeHtml(row.name)}
             </div>
@@ -624,11 +641,6 @@
     $("case-domain-filter").innerHTML = `<option value="all">All domains</option>` + domainOptions.map((domain) => `
       <option value="${escapeHtml(domain)}">${escapeHtml(domain)}</option>
     `).join("");
-
-    const taskTypeOptions = data.taxonomy.taskTypes.map((row) => row.label);
-    $("case-task-filter").innerHTML = `<option value="all">All task types</option>` + taskTypeOptions.map((taskType) => `
-      <option value="${escapeHtml(taskType)}">${escapeHtml(taskType)}</option>
-    `).join("");
   }
 
   function scoreBackground(score) {
@@ -655,7 +667,6 @@
     const search = state.caseSearch.trim().toLowerCase();
     return data.cases.filter((row) => {
       if (state.caseDomain !== "all" && row.domain !== state.caseDomain) return false;
-      if (state.caseTask !== "all" && row.mlTaskType !== state.caseTask) return false;
       if (!search) return true;
       return [
         row.caseId,
@@ -699,7 +710,6 @@
     $("case-table-head").innerHTML = `
       <tr>
         <th>Task Name</th>
-        <th>Case ID</th>
         <th>Domain</th>
         <th>Task</th>
         <th>Best</th>
@@ -714,7 +724,7 @@
     if (!rows.length) {
       $("case-table-body").innerHTML = `
         <tr>
-          <td class="case-empty" colspan="${modelOrder.length + 5}">No matching tasks.</td>
+          <td class="case-empty" colspan="${modelOrder.length + 4}">No matching tasks.</td>
         </tr>
       `;
       return;
@@ -726,7 +736,6 @@
           <div class="case-title" title="${escapeHtml(row.title)}">${escapeHtml(row.title)}</div>
           <div class="case-meta">${escapeHtml(row.domain)}</div>
         </td>
-        <td><span class="case-id">${escapeHtml(row.caseId)}</span></td>
         <td>${escapeHtml(row.domain)}</td>
         <td>${escapeHtml(row.mlTaskType)}</td>
         <td>${row.bestModel ? `${escapeHtml(row.bestModel)}<div class="case-meta">${formatScore(row.bestScore)}</div>` : ""}</td>
@@ -854,26 +863,6 @@
     });
   }
 
-  function renderFeaturedDetailTabs() {
-    if (!detailTabs.some(([key]) => key === state.featuredDetail)) {
-      state.featuredDetail = "trajectory";
-    }
-
-    $("featured-detail-tabs").innerHTML = detailTabs.map(([key, label]) => `
-      <button class="featured-detail-tab ${key === state.featuredDetail ? "active" : ""}" data-featured-detail="${escapeHtml(key)}">
-        ${escapeHtml(label)}
-      </button>
-    `).join("");
-
-    document.querySelectorAll("[data-featured-detail]").forEach((button) => {
-      button.addEventListener("click", () => {
-        state.featuredDetail = button.dataset.featuredDetail;
-        renderFeaturedDetailTabs();
-        renderFeaturedDetail();
-      });
-    });
-  }
-
   function renderFeaturedSummary(item) {
     $("featured-case-summary").innerHTML = `
       <div class="board-label">${escapeHtml(item.role)}</div>
@@ -896,31 +885,14 @@
           <small>runtime ${escapeHtml(item.runtime)}</small>
         </div>
       </div>
+      <a class="featured-trace-link" href="trace-prototype.html?case=${encodeURIComponent(item.key)}">
+        View full trace
+      </a>
     `;
   }
 
   function renderFeaturedDetail() {
     const item = selectedFeaturedCase();
-    if (state.featuredDetail === "diagnosis") {
-      $("featured-detail-body").innerHTML = `
-        <div class="evidence-grid diagnosis-grid">
-          <div class="evidence-box">
-            <h4>Paper route</h4>
-            <p>${escapeHtml(item.paper)}</p>
-          </div>
-          <div class="evidence-box">
-            <h4>Agent route</h4>
-            <p>${escapeHtml(item.route)}</p>
-          </div>
-          <div class="evidence-box diagnosis-verdict">
-            <h4>Judge diagnosis</h4>
-            <p>${escapeHtml(item.verdict)}</p>
-          </div>
-        </div>
-      `;
-      return;
-    }
-
     $("featured-detail-body").innerHTML = `
       <div class="line-chart-card">
         <div class="line-chart-head">
@@ -939,7 +911,6 @@
     const item = selectedFeaturedCase();
     renderFeaturedCaseTabs();
     renderFeaturedSummary(item);
-    renderFeaturedDetailTabs();
     renderFeaturedDetail();
   }
 
@@ -962,10 +933,13 @@
   }
 
   function bindEvents() {
-    $("rank-metric").addEventListener("change", (event) => {
-      state.rankMetric = event.target.value;
-      renderLeaderboard();
-    });
+    const rankMetric = $("rank-metric");
+    if (rankMetric) {
+      rankMetric.addEventListener("change", (event) => {
+        state.rankMetric = event.target.value;
+        renderLeaderboard();
+      });
+    }
 
     $("domain-select").addEventListener("change", (event) => {
       state.selectedDomain = event.target.value;
@@ -979,11 +953,6 @@
 
     $("case-domain-filter").addEventListener("change", (event) => {
       state.caseDomain = event.target.value;
-      renderCaseTable();
-    });
-
-    $("case-task-filter").addEventListener("change", (event) => {
-      state.caseTask = event.target.value;
       renderCaseTable();
     });
 
