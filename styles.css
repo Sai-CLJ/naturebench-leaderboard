@@ -454,7 +454,7 @@ section {
 }
 
 .compact-bars .bar-row {
-  grid-template-columns: 170px 1fr 70px;
+  grid-template-columns: 230px 1fr 70px;
 }
 
 .bar-name {
@@ -466,6 +466,20 @@ section {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.bar-model-identity,
+.distribution-name.model-cell {
+  min-width: 0;
+  gap: 0.45rem;
+}
+
+.bar-model-identity .method-name,
+.distribution-name .method-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .rank-dot {
@@ -895,7 +909,7 @@ td.board-value {
 
 .distribution-row {
   display: grid;
-  grid-template-columns: 184px 1fr 64px;
+  grid-template-columns: 230px 1fr 64px;
   gap: 0.85rem;
   align-items: center;
 }

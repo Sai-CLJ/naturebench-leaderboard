@@ -508,11 +508,15 @@
 
   function renderDistribution() {
     const rows = data.distributions;
-    $("distribution-chart").innerHTML = rows.map((row) => {
+    const chart = $("distribution-chart");
+    chart.innerHTML = rows.map((row) => {
       const surpass = data.leaderboard.find((item) => item.name === row.name)?.surpassSota ?? 0;
       return `
         <div class="distribution-row">
-          <div class="distribution-name" title="${escapeHtml(row.name)}">${escapeHtml(row.name)}</div>
+          <div class="distribution-name model-cell" title="${escapeHtml(row.name)}">
+            ${modelLogoMarkup(row.name)}
+            <span class="method-name">${escapeHtml(row.name)}</span>
+          </div>
           <div class="stacked-bar" aria-label="${escapeHtml(row.name)} score distribution">
             ${row.bins.map((bin, index) => `
               <div class="segment ${binClasses[index]}" style="width:${bin.percent}%" title="${escapeHtml(bin.label)}: ${bin.count} (${bin.percent}%)"></div>
@@ -529,6 +533,7 @@
         <span class="legend-swatch ${binClasses[index]}"></span>${escapeHtml(bin.label)}
       </span>
     `).join("");
+    bindLogoFallbacks(chart);
   }
 
   function renderDomainGrid() {
@@ -569,7 +574,8 @@
     $("domain-chart-title").textContent = domain.domain;
     $("domain-chart-subtitle").textContent = `N=${domain.n} tasks · Surpass-SOTA rate · Fixed 0-${domainBarScaleMax}% scale`;
 
-    $("domain-chart").innerHTML = `
+    const chart = $("domain-chart");
+    chart.innerHTML = `
       <div class="domain-scale-note">Surpass-SOTA rate, fixed 0-${domainBarScaleMax}% scale</div>
       <div class="domain-scale-axis" aria-hidden="true">
         ${[0, 10, 20, 30, 40].map((tick) => `<span>${tick}</span>`).join("")}
@@ -579,7 +585,11 @@
         return `
           <div class="bar-row model-color-row" style="--model-color:${modelColor(row.name)}">
             <div class="bar-name" title="${escapeHtml(row.name)}">
-              <span class="rank-dot">${index + 1}</span>${escapeHtml(row.name)}
+              <span class="rank-dot">${index + 1}</span>
+              <span class="bar-model-identity model-cell">
+                ${modelLogoMarkup(row.name)}
+                <span class="method-name">${escapeHtml(row.name)}</span>
+              </span>
             </div>
             <div class="bar-track" aria-hidden="true">
               <div class="bar-fill" style="--w:${width}%"></div>
@@ -589,6 +599,7 @@
         `;
       }).join("")}
     `;
+    bindLogoFallbacks(chart);
   }
 
   function renderCaseLegend() {
