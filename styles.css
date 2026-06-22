@@ -275,8 +275,7 @@ code {
   object-fit: contain;
 }
 
-[data-theme="dark"] .github-logo,
-[data-theme="dark"] .arxiv-logo {
+[data-theme="dark"] .github-logo {
   filter: invert(1) brightness(1.08);
 }
 
