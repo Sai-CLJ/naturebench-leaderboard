@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Hugging Face">
+  <circle cx="32" cy="32" r="24" fill="#ffcc4d"/>
+  <circle cx="23" cy="27" r="3.6" fill="#65471b"/>
+  <circle cx="41" cy="27" r="3.6" fill="#65471b"/>
+  <path d="M23 38c4 5 14 5 18 0" fill="none" stroke="#65471b" stroke-width="4" stroke-linecap="round"/>
+  <path d="M9 36c-4 2-5 8-1 11 4 3 9-1 12-4" fill="#ffcc4d" stroke="#65471b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M55 36c4 2 5 8 1 11-4 3-9-1-12-4" fill="#ffcc4d" stroke="#65471b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M17 18c-3-5 2-10 7-7" fill="#ffcc4d" stroke="#65471b" stroke-width="3" stroke-linecap="round"/>
+  <path d="M47 18c3-5-2-10-7-7" fill="#ffcc4d" stroke="#65471b" stroke-width="3" stroke-linecap="round"/>
+</svg>

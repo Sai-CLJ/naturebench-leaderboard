@@ -252,6 +252,7 @@ code {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.48rem;
   min-height: 38px;
   padding: 0.55rem 1rem;
   border: 1px solid var(--border-color);
@@ -260,6 +261,23 @@ code {
   color: var(--text-primary);
   font-size: 0.82rem;
   font-weight: 800;
+}
+
+.resource-btn {
+  min-width: 132px;
+}
+
+.resource-logo {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  display: block;
+  object-fit: contain;
+}
+
+[data-theme="dark"] .github-logo,
+[data-theme="dark"] .arxiv-logo {
+  filter: invert(1) brightness(1.08);
 }
 
 .btn-primary {
